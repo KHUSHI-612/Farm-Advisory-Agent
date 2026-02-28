@@ -1,0 +1,17 @@
+# Model artifacts (stored on Hugging Face: shiavm006/Crop-yield_pridiction)
+model/*.pkl
+
+# Python
+__pycache__/
+*.py[cod]
+.env
+.venv/
+venv/
+*.egg-info/
+.eggs/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store
