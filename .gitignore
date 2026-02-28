@@ -16,3 +16,4 @@ venv/
 *.swp
 .DS_Store
 *.pkl
+*.pkl
