@@ -10,7 +10,7 @@
    ```
 2. **Start Streamlit**
    ```bash
-   streamlit run app.py
+   streamlit run streamlit_app.py
    ```
 3. Open the URL in the browser (e.g. http://localhost:8501).
 
