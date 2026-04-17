@@ -1,0 +1,58 @@
+WHEAT CROP ADVISORY GUIDE
+Source: FAO Agronomy Guidelines for Wheat Production
+
+OVERVIEW
+Wheat (Triticum aestivum) is one of the world's most important cereal crops. It grows best in temperate climates and is highly sensitive to temperature, rainfall, and soil conditions.
+
+OPTIMAL GROWING CONDITIONS
+- Temperature: 15-24°C during growing season; 10-15°C at germination
+- Rainfall: 450-650 mm per growing season (well-distributed)
+- Soil pH: 6.0 to 7.5
+- Soil Type: Well-drained loamy or clay-loam soils
+- Altitude: Can grow from sea level to 3000m depending on variety
+
+PLANTING
+- Sowing Depth: 3-5 cm
+- Sowing Time: October-November (Rabi season in South Asia); Autumn in temperate zones
+- Seed Rate: 100-125 kg/ha
+- Row Spacing: 20-25 cm
+
+FERTILIZER REQUIREMENTS
+- Nitrogen (N): 120-150 kg/ha (split doses: basal + top dressing at tillering)
+- Phosphorus (P): 60-80 kg/ha (basal application)
+- Potassium (K): 40-60 kg/ha (basal application)
+- Zinc: Apply 25 kg ZnSO4/ha if deficient
+- Avoid excessive nitrogen as it leads to lodging and pest susceptibility
+
+WATER MANAGEMENT
+- Critical irrigation stages: Crown Root Initiation (CRI), tillering, jointing, flowering, milking
+- Water stress at flowering reduces yield by 30-50%
+- Waterlogging is harmful; ensure proper drainage
+- Total water requirement: 450-600 mm
+
+PEST AND DISEASE MANAGEMENT
+- Major Pests: Aphids, Hessian fly, Shoot fly
+- Recommendation: Use neem-based biopesticides; spray chlorpyrifos only when pest count exceeds threshold
+- Major Diseases: Rust (yellow, brown, black), Powdery mildew, Loose smut
+- Use resistant varieties; apply propiconazole fungicide at first sign of rust
+- Pesticide use above 150 tonnes/region indicates high chemical load — consider IPM strategies
+
+YIELD BENCHMARKS
+- Low yield: Below 2.0 t/ha — indicates poor soil health, drought, or pest pressure
+- Average yield: 2.0 to 4.0 t/ha — typical rain-fed conditions
+- Good yield: 4.0 to 6.0 t/ha — optimized irrigation and fertilization
+- Excellent yield: Above 6.0 t/ha — high-input irrigated farming
+
+CLIMATE CHANGE ADAPTATION
+- High temperatures (above 30°C) during grain-filling reduce yield
+- Use heat-tolerant varieties like HD-2967, GW-322
+- Shift sowing dates earlier if temperatures rising
+- Increase organic matter in soil for moisture retention
+
+POST-HARVEST
+- Harvest at 20-25% grain moisture; dry to 12-14% for storage
+- Store in moisture-proof, airtight bins
+- Avoid pesticide residue by observing waiting periods before harvest
+
+SAFETY AND DISCLAIMER
+All pesticide applications must comply with local agricultural regulations. Consult your local Krishi Vigyan Kendra (KVK) or extension officer before applying any chemical treatment. Yield predictions are estimates based on historical data and may vary with local conditions.

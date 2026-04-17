@@ -1,0 +1,63 @@
+CASSAVA CROP ADVISORY GUIDE
+Source: FAO Agronomy Guidelines for Cassava Production
+
+OVERVIEW
+Cassava (Manihot esculenta) is a drought-tolerant root crop and a primary calorie source for over 800 million people in tropical Africa, Asia, and Latin America. It is one of the most resilient crops under poor soil and dry conditions.
+
+OPTIMAL GROWING CONDITIONS
+- Temperature: 25-29°C
+- Rainfall: 1000-1500 mm per year; tolerates 600 mm minimum
+- Soil pH: 5.5 to 7.0
+- Soil Type: Well-drained, light to medium-textured soils (sandy loam ideal)
+- Cassava is one of the few crops that produces well in poor, acidic soils
+
+PLANTING
+- Planting Material: Stem cuttings (stakes) 20-30 cm long from healthy plants
+- Planting Method: Vertical, horizontal, or slanted — slanted preferred for dry areas
+- Spacing: 1m x 1m (10,000 plants/ha) for fresh market; 1m x 0.8m for starch
+- Planting Season: Beginning of rainy season for rain-fed; any time with irrigation
+
+FERTILIZER REQUIREMENTS
+- Cassava is known for growing in poor soils but responds well to fertilizers
+- Nitrogen (N): 60-80 kg/ha
+- Phosphorus (P): 40-60 kg/ha
+- Potassium (K): 80-100 kg/ha (most critical — reduces cyanide content)
+- Organic manure: 5-10 tonnes/ha improves structure and yield
+- Avoid excess nitrogen in early stages — promotes vegetative growth over roots
+
+WATER MANAGEMENT
+- Cassava is drought-tolerant but not drought-immune
+- Critical water period: first 3 months after planting (root establishment)
+- Waterlogging causes root rot — ensure proper drainage
+- Water stress after 6 months affects starch accumulation
+
+PEST AND DISEASE MANAGEMENT
+- Major Pests: Cassava Mealybug, Cassava Green Mite, Whitefly
+- Cassava Mealybug: Biological control with Anagyrus lopezi (parasitoid wasp) — very effective
+- Whitefly vectors CMD (Cassava Mosaic Disease) — remove infected plants immediately
+- Major Diseases: Cassava Mosaic Disease (CMD), Cassava Brown Streak Disease (CBSD)
+- Use virus-indexed, clean planting material — most important intervention
+- Cassava Bacterial Blight: Copper-based bactericide; avoid working in wet fields
+- Pesticide overuse damages beneficial insects and increases pest resistance
+
+YIELD BENCHMARKS
+- Low yield: Below 8 t/ha — disease-infected planting material, poor soil, drought
+- Average yield: 8 to 15 t/ha — typical smallholder farming in Africa/Asia
+- Good yield: 15 to 25 t/ha — improved varieties with good management
+- Excellent yield: Above 25 t/ha — high-input commercial farming
+
+CYANIDE CONTENT
+- All cassava contains cyanogenic glucosides (HCN)
+- Sweet varieties: < 50 mg HCN/kg fresh weight (safe after cooking)
+- Bitter varieties: > 200 mg HCN/kg (must be processed before consumption)
+- Proper soaking, drying, or fermentation removes cyanide
+- Never eat raw bitter cassava — it is toxic
+
+POST-HARVEST
+- Harvest 8-24 months after planting depending on variety and use
+- Fresh roots deteriorate within 2-3 days — process or sell quickly
+- Dry chips or flour for longer shelf life (12+ months)
+- Store processed products in moisture-proof bags
+
+SAFETY AND DISCLAIMER
+Raw bitter cassava contains toxic levels of hydrocyanic acid (HCN). Always process before consumption. Use certified disease-free planting material to prevent CMD and CBSD spread. Pesticide applications must follow label directions. Consult local extension for variety selection suited to your region.

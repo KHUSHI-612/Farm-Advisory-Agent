@@ -1,0 +1,58 @@
+RICE CROP ADVISORY GUIDE
+Source: FAO Agronomy Guidelines for Rice Production
+
+OVERVIEW
+Rice (Oryza sativa) is a staple food for more than half the world's population. It is primarily a tropical crop requiring warm temperatures, high humidity, and abundant water.
+
+OPTIMAL GROWING CONDITIONS
+- Temperature: 20-35°C; ideal 25-30°C during growing season
+- Rainfall: 1000-2000 mm per season (paddy rice requires standing water)
+- Soil pH: 5.5 to 7.0
+- Soil Type: Heavy clay or clay-loam with poor drainage (retains water)
+- Water Requirement: 900-2500 mm per season (irrigated paddy)
+
+PLANTING
+- Sowing Method: Direct seeding or transplanting of 25-30 day old seedlings
+- Nursery Period: 25-30 days
+- Transplanting Spacing: 20x15 cm or 20x20 cm
+- Seed Rate (Direct): 60-80 kg/ha; (Transplant) 40-50 kg/ha
+
+FERTILIZER REQUIREMENTS
+- Nitrogen (N): 100-120 kg/ha (3 split doses: basal, tillering, panicle initiation)
+- Phosphorus (P): 50-60 kg/ha (basal)
+- Potassium (K): 50-60 kg/ha (basal + topdress)
+- Zinc deficiency common in flooded soils — apply 25 kg ZnSO4/ha
+- Excessive pesticides in flooded rice fields contaminate water and harm aquatic life
+
+WATER MANAGEMENT
+- Maintain 5-7 cm standing water during vegetative phase
+- Drain field 10-15 days before harvest
+- Alternate wetting and drying (AWD) technique saves 30% water
+- Water stress at flowering causes severe yield loss (up to 50%)
+
+PEST AND DISEASE MANAGEMENT
+- Major Pests: Brown planthopper (BPH), stem borer, leaf folder, gall midge
+- BPH causes "hopperburn" — use resistant varieties; avoid excess nitrogen
+- Do not use pesticides excessively in flooded fields — disrupts ecosystem
+- Major Diseases: Blast, Bacterial leaf blight (BLB), Sheath blight
+- Use certified disease-free seeds; apply tricyclazole for blast
+- IPM recommended: light traps for stem borer, Trichogramma biocontrol
+
+YIELD BENCHMARKS
+- Low yield: Below 2.5 t/ha — drought stress, nutrient deficiency, or heavy pest damage
+- Average yield: 2.5 to 5.0 t/ha — rain-fed or moderate input conditions
+- Good yield: 5.0 to 7.0 t/ha — irrigated, well-managed cultivation
+- Excellent yield: Above 7.0 t/ha — high-input, hybrid varieties
+
+CLIMATE CHANGE ADAPTATION
+- Rising temperatures above 35°C during flowering causes sterility
+- Use submergence-tolerant varieties (e.g., Swarna-Sub1) in flood-prone areas
+- System of Rice Intensification (SRI) improves yields with less water
+
+POST-HARVEST
+- Harvest at 20-25% grain moisture
+- Dry to 14% moisture for safe storage
+- Losses due to improper drying and storage can be 10-30%
+
+SAFETY AND DISCLAIMER
+All chemical pesticide applications must follow label instructions and local regulations. Avoid pesticide use near water bodies. Consult local agricultural extension officers for region-specific recommendations. Yield predictions are estimates based on historical averages.

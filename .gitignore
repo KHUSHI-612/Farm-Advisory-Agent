@@ -17,3 +17,6 @@ venv/
 .DS_Store
 *.pkl
 *.pkl
+.env
+__pycache__/
+rag/vectorstore/

@@ -1,0 +1,60 @@
+MAIZE (CORN) CROP ADVISORY GUIDE
+Source: FAO Agronomy Guidelines for Maize Production
+
+OVERVIEW
+Maize (Zea mays) is a versatile cereal crop grown globally for food, feed, and industrial uses. It is one of the highest-yielding crops under optimal conditions.
+
+OPTIMAL GROWING CONDITIONS
+- Temperature: 18-32°C; frost-sensitive crop
+- Rainfall: 500-800 mm per growing season (well-distributed)
+- Soil pH: 5.8 to 7.0
+- Soil Type: Deep, well-drained loamy soils with high organic matter
+- Altitude: Up to 3000m with suitable varieties
+
+PLANTING
+- Sowing Depth: 4-6 cm
+- Seed Rate: 20-25 kg/ha
+- Plant Spacing: 60-75 cm between rows, 20-25 cm within row
+- Plant Population: 55,000-65,000 plants/ha
+
+FERTILIZER REQUIREMENTS
+- Nitrogen (N): 150-180 kg/ha (split: 30% basal, 40% at knee-high, 30% at tasseling)
+- Phosphorus (P): 60-80 kg/ha (basal)
+- Potassium (K): 40-60 kg/ha (basal)
+- Boron and Zinc often deficient — foliar spray recommended
+- High nitrogen without adequate moisture leads to lodging
+
+WATER MANAGEMENT
+- Most critical stages: V6 (knee-high), tasseling, silking, and grain-fill
+- Water stress at silking reduces yield by 50%
+- Total water requirement: 500-700 mm
+- Avoid waterlogging — maize roots are highly sensitive to oxygen deficiency
+
+PEST AND DISEASE MANAGEMENT
+- Major Pests: Fall Armyworm (FAW), stem borer, aphids, cutworms
+- Fall Armyworm: inspect whorls; apply emamectin benzoate or spinetoram
+- Use pheromone traps for early detection
+- Major Diseases: Northern corn leaf blight, gray leaf spot, stalk rot
+- Use resistant hybrids; apply mancozeb at first disease signs
+- Avoid high plant density in humid regions — promotes disease spread
+- Excessive pesticide use above 100 tonnes/region indicates overuse — adopt IPM
+
+YIELD BENCHMARKS
+- Low yield: Below 2.0 t/ha — soil degradation, drought, or pest damage
+- Average yield: 2.0 to 5.0 t/ha — rain-fed conditions
+- Good yield: 5.0 to 8.0 t/ha — irrigated with hybrid seeds
+- Excellent yield: Above 8.0 t/ha — precision farming, optimal inputs
+
+CLIMATE CHANGE ADAPTATION
+- Drought-tolerant varieties (DTMA hybrids) for water-stressed regions
+- Heat-tolerant varieties for areas with rising temperatures
+- Conservation agriculture (minimum tillage) improves soil moisture retention
+
+POST-HARVEST
+- Harvest when husks are dry and kernels are hard (~20% moisture)
+- Dry to 13-14% for safe storage
+- Store in hermetic bags or metal silos to prevent aflatoxin contamination
+- Aflatoxin contamination is a serious health risk — test grain before consumption
+
+SAFETY AND DISCLAIMER
+Maize grain with visible mold or discoloration should not be consumed. All pesticide applications must comply with national regulations. FAW spraying should target early instar larvae for effectiveness. Consult local extension services for hybrid selection. Predictions are based on historical regional data.

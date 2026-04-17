@@ -1,0 +1,68 @@
+SORGHUM CROP ADVISORY GUIDE
+Source: FAO Agronomy Guidelines for Sorghum Production
+
+OVERVIEW
+Sorghum (Sorghum bicolor) is a drought-tolerant cereal crop, vital for food security in semi-arid and arid regions of Africa and Asia. It is the fifth most important cereal crop globally.
+
+OPTIMAL GROWING CONDITIONS
+- Temperature: 25-35°C; highly heat tolerant
+- Rainfall: 400-600 mm per season; tolerates as low as 300 mm
+- Soil pH: 5.5 to 7.5
+- Soil Type: Well-drained loamy or clay soils; tolerates poor soils better than most cereals
+- Altitude: Sea level to 2300m
+
+PLANTING
+- Sowing Depth: 3-5 cm
+- Seed Rate: 8-12 kg/ha
+- Row Spacing: 60-75 cm
+- Plant Population: 100,000-180,000 plants/ha
+- Sowing Time: At onset of rains or with irrigation
+
+FERTILIZER REQUIREMENTS
+- Nitrogen (N): 80-120 kg/ha (split: basal + top dress at 30 days)
+- Phosphorus (P): 40-60 kg/ha (basal)
+- Potassium (K): 20-40 kg/ha
+- Sorghum responds well to organic manure (5 t/ha)
+- Avoid excess nitrogen on poor-drainage soils
+
+WATER MANAGEMENT
+- Sorghum has excellent drought tolerance due to deep root system
+- Critical water stage: flowering and grain filling
+- Can survive short dry spells but yield drops significantly under prolonged drought
+- Waterlogging tolerance is low — ensure drainage
+- Total water requirement: 350-500 mm
+
+PEST AND DISEASE MANAGEMENT
+- Major Pests: Sorghum midge, shoot fly, stem borer, aphids
+- Sorghum Midge: Most damaging at flowering — use resistant varieties; spray cypermethrin
+- Shoot Fly: Seed treatment with imidacloprid; early planting reduces incidence
+- Major Diseases: Grain mold, downy mildew, charcoal rot, anthracnose
+- Grain Mold: Major post-harvest quality issue — harvest promptly; use mold-resistant varieties
+- Striga (witchweed): Parasitic weed — most serious biotic constraint in Africa
+- Striga control: Use Striga-resistant varieties; apply ethylene to stimulate suicidal germination
+
+YIELD BENCHMARKS
+- Low yield: Below 1.0 t/ha — drought, Striga infestation, or poor soil
+- Average yield: 1.0 to 2.5 t/ha — rain-fed smallholder conditions
+- Good yield: 2.5 to 4.5 t/ha — improved varieties with good management
+- Excellent yield: Above 4.5 t/ha — irrigated, high-input commercial farming
+
+SPECIAL USES
+- Grain sorghum: food and animal feed
+- Sweet sorghum: biofuel and syrup production
+- Forage sorghum: high-biomass animal fodder
+- Sorghum is gluten-free — important for celiac disease patients
+
+CLIMATE CHANGE ADAPTATION
+- One of the most climate-resilient crops — ideal for drying climates
+- Short-season varieties for erratic rainfall patterns
+- Can be replanted after crop failure due to short season (60-90 days)
+
+POST-HARVEST
+- Harvest at 20-25% grain moisture; thresh when dry
+- Dry to 12-13% for safe storage
+- Grain mold is a major quality issue — store in dry, ventilated conditions
+- Tannin-containing varieties have better storage life
+
+SAFETY AND DISCLAIMER
+Some sorghum varieties contain high tannins or dhurrin (cyanide compound in young shoots) — do not feed young green sorghum shoots to livestock in large amounts. All pesticide applications must follow label instructions. Striga management requires multi-season integrated approach. Yield estimates are based on historical regional data.

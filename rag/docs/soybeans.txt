@@ -1,0 +1,68 @@
+SOYBEAN CROP ADVISORY GUIDE
+Source: FAO Agronomy Guidelines for Soybean Production
+
+OVERVIEW
+Soybean (Glycine max) is a high-protein, high-oil legume crop used for food, feed, and industrial products. It has the unique ability to fix atmospheric nitrogen through symbiosis with Bradyrhizobium japonicum bacteria.
+
+OPTIMAL GROWING CONDITIONS
+- Temperature: 20-30°C; frost-sensitive
+- Rainfall: 450-700 mm per growing season
+- Soil pH: 6.0 to 7.0
+- Soil Type: Well-drained, fertile loamy soils
+- Day Length: Short-day plant (requires <14 hours of daylight to flower)
+
+PLANTING
+- Sowing Depth: 3-5 cm
+- Seed Rate: 60-80 kg/ha
+- Row Spacing: 30-45 cm
+- Plant Population: 300,000-400,000 plants/ha
+- Seed Treatment: Inoculate with Bradyrhizobium japonicum before planting — critical for nitrogen fixation
+
+FERTILIZER REQUIREMENTS
+- Nitrogen (N): Minimal if properly inoculated (10-20 kg/ha starter only)
+- Phosphorus (P): 60-80 kg/ha (critical for root nodule development)
+- Potassium (K): 40-60 kg/ha
+- Sulfur: 20-30 kg/ha (essential for protein synthesis)
+- Calcium and Boron: Important for pod development
+- Over-application of nitrogen suppresses biological N-fixation — avoid
+
+WATER MANAGEMENT
+- Critical stages: flowering (R1-R2) and pod fill (R5-R6)
+- Water stress at flowering reduces pod set by 30-50%
+- Total water requirement: 450-700 mm
+- Avoid waterlogging — causes root rot and nodule death
+- Drought at seed fill causes shriveled, low-quality seeds
+
+PEST AND DISEASE MANAGEMENT
+- Major Pests: Soybean aphid, bean pod borer, spider mites, thrips
+- Aphid: Spray imidacloprid at threshold of 250 aphids/plant
+- Defoliators: Allow up to 20% leaf damage before treatment
+- Major Diseases: Soybean rust (Phakopsora pachyrhizi), Sudden Death Syndrome, Frogeye leaf spot
+- Soybean rust: Most damaging — scout regularly; apply triazole fungicide early
+- Use disease-resistant varieties where possible
+- Excessive pesticide use disrupts beneficial insects including bee pollinators
+
+YIELD BENCHMARKS
+- Low yield: Below 1.0 t/ha — poor inoculation, drought, or heavy rust
+- Average yield: 1.0 to 2.5 t/ha — typical rain-fed conditions
+- Good yield: 2.5 to 4.0 t/ha — optimized management
+- Excellent yield: Above 4.0 t/ha — high-input precision agriculture
+
+NITROGEN FIXATION BENEFIT
+- Well-inoculated soybeans fix 100-300 kg N/ha — benefits subsequent crops
+- Always rotate soybeans with cereals to maximize soil nitrogen contribution
+- Crop rotation: soybean-maize-wheat is highly recommended
+
+CLIMATE CHANGE ADAPTATION
+- Heat-tolerant varieties for temperatures above 32°C
+- Adjust planting date based on rainfall onset
+- Drought-tolerant varieties for water-limited regions
+
+POST-HARVEST
+- Harvest at 13-15% grain moisture
+- Dry to 12% for storage
+- Store in cool, dry conditions to prevent mold and mycotoxin formation
+- Premium grades require <2% damaged kernels
+
+SAFETY AND DISCLAIMER
+Raw soybeans contain trypsin inhibitors — always cook before consumption. Soybean rust spreads rapidly — early scouting is critical. Inoculant quality is critical — use fresh, certified Bradyrhizobium inoculants. Pesticide applications near flowering may harm pollinators — apply in evenings. Yield estimates are based on historical regional data.

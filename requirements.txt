@@ -5,3 +5,12 @@ scikit-learn>=1.2.0
 huggingface_hub>=0.19.0
 plotly>=5.14.0
 reportlab>=4.0.0
+langchain
+langgraph
+langchain-community
+langchain-anthropic   
+faiss-cpu
+pypdf
+anthropic
+python-dotenv
+sentence-transformers

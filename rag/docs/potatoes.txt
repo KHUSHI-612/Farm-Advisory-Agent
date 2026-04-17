@@ -1,0 +1,62 @@
+POTATO CROP ADVISORY GUIDE
+Source: FAO Agronomy Guidelines for Potato Production
+
+OVERVIEW
+Potato (Solanum tuberosum) is the world's fourth most important food crop. It thrives in cool climates and is highly responsive to irrigation and fertilization.
+
+OPTIMAL GROWING CONDITIONS
+- Temperature: 15-20°C for tuber formation; above 30°C suppresses tuberization
+- Rainfall: 400-600 mm per season
+- Soil pH: 5.0 to 6.5 (slightly acidic preferred)
+- Soil Type: Loose, well-drained sandy loam or loam soils
+- Altitude: Grows best at 1000-3000m elevation in tropical regions
+
+PLANTING
+- Seed Material: Certified disease-free seed tubers (40-60g each)
+- Seed Rate: 1500-2500 kg/ha
+- Planting Depth: 10-15 cm
+- Row Spacing: 60-75 cm; Plant spacing: 25-30 cm
+- Earthing up: Critical at 20-25 days and 45-50 days after planting
+
+FERTILIZER REQUIREMENTS
+- Nitrogen (N): 150-180 kg/ha (split doses; avoid excess — promotes late blight)
+- Phosphorus (P): 100-120 kg/ha (critical for tuber initiation)
+- Potassium (K): 150-200 kg/ha (most important — improves tuber quality)
+- Calcium and Magnesium: Apply if soil tests indicate deficiency
+- Sulfur: 20-30 kg/ha improves protein quality
+
+WATER MANAGEMENT
+- Critical irrigation stages: stolon initiation, tuber bulking
+- Water stress during bulking causes knobby/misshapen tubers
+- Total water requirement: 500-700 mm
+- Avoid waterlogging — causes tuber rot
+- Drip or furrow irrigation preferred over sprinkler (reduces foliar disease)
+
+PEST AND DISEASE MANAGEMENT
+- Late Blight (Phytophthora infestans): Most devastating disease; use metalaxyl/mancozeb
+- Spray every 7-10 days in humid weather; use resistant varieties
+- Early Blight: Apply chlorothalonil; maintain plant vigor
+- Major Pests: Potato tuber moth, aphids, wireworms
+- Tuber moth: Use pheromone traps; hill soil properly to prevent exposed tubers
+- Colorado Potato Beetle: Apply spinosad or imidacloprid; rotate chemicals
+- High pesticide use increases resistance risk — rotate mode-of-action groups
+
+YIELD BENCHMARKS
+- Low yield: Below 10 t/ha — disease pressure, poor seed, or drought
+- Average yield: 10 to 20 t/ha — typical smallholder farming
+- Good yield: 20 to 35 t/ha — improved varieties, good management
+- Excellent yield: Above 35 t/ha — certified seed, irrigation, precision inputs
+
+CLIMATE CHANGE ADAPTATION
+- Use heat-tolerant varieties for warmer regions
+- Shift planting dates to cooler months
+- Mulching reduces soil temperature and conserves moisture
+
+POST-HARVEST
+- Cure tubers at 15-20°C, 85-95% humidity for 2 weeks before storage
+- Store at 4°C for long-term, 8-10°C for seed potatoes
+- Avoid greening (solanine formation) — store in dark conditions
+- Green potatoes are toxic and must not be consumed
+
+SAFETY AND DISCLAIMER
+Green or sprouted potatoes contain solanine — a toxic alkaloid. Do not consume. All fungicide applications must follow pre-harvest intervals. Late blight spreads rapidly — early detection is critical. Yield estimates are based on regional historical data and may vary significantly with local conditions.

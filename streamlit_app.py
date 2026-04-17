@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import pandas as pd
 import pickle
@@ -10,6 +11,14 @@ from datetime import datetime
 import streamlit.components.v1 as components
 
 sys.path.insert(0, str(Path(__file__).parent))
+
+# Load .env BEFORE any os.environ.get() checks (e.g. ANTHROPIC_API_KEY).
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).parent / ".env")
+except Exception:
+    pass
+
 from report_generator import generate_pdf_report, build_html_report
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -970,10 +979,22 @@ section[data-testid="stSidebar"] .nav-on .stButton > button {{
 # ══════════════════════════════════════════════════════════════════════════════
 #  SESSION STATE INIT
 # ══════════════════════════════════════════════════════════════════════════════
-if "page"       not in st.session_state: st.session_state.page       = "model"
-if "result"     not in st.session_state: st.session_state.result     = None
-if "inputs"     not in st.session_state: st.session_state.inputs     = {}
-if "app_loaded" not in st.session_state: st.session_state.app_loaded = False
+if "page"              not in st.session_state: st.session_state.page              = "model"
+if "result"            not in st.session_state: st.session_state.result            = None
+if "inputs"            not in st.session_state: st.session_state.inputs            = {}
+if "app_loaded"        not in st.session_state: st.session_state.app_loaded        = False
+if "advisory_result"   not in st.session_state: st.session_state.advisory_result   = None
+# ── Chat state for the Advisory Agent ──────────────────────────────────────
+if "chat_messages"     not in st.session_state: st.session_state.chat_messages     = []
+if "chat_farm_ctx"     not in st.session_state: st.session_state.chat_farm_ctx     = {
+    "crop": "Wheat", "area": "India", "year": 2024,
+    "rainfall": 800.0, "temperature": 25.0, "pesticides": 100.0,
+    "predicted_yield_tha": None, "predicted_yield_hg": None,
+    "yield_risk": None, "yield_band": None, "benchmark_avg": None,
+}
+if "chat_uploaded_text"  not in st.session_state: st.session_state.chat_uploaded_text  = ""
+if "chat_uploaded_names" not in st.session_state: st.session_state.chat_uploaded_names = []
+if "chat_context_synced" not in st.session_state: st.session_state.chat_context_synced = False
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  APP PRELOADER
@@ -1347,6 +1368,7 @@ def render_sidebar():
             ("model",    ICONS["model"],    "Predict Yield"),
             ("results",  ICONS["results"],  "Results"),
             ("insights", ICONS["insights"], "Model Insights"),
+            ("advisory", "🤖",              "Advisory Agent"),
             ("about",    ICONS["about"],    "About"),
         ]
 
@@ -1815,6 +1837,468 @@ def page_about():
     st.markdown("</div>", unsafe_allow_html=True)  # page-content
 
 # ══════════════════════════════════════════════════════════════════════════════
+#  PAGE: ADVISORY AGENT  (conversational chat + doc upload)
+# ══════════════════════════════════════════════════════════════════════════════
+def _extract_uploaded_text(files) -> tuple[str, list[str]]:
+    """Read a list of UploadedFile objects and return (combined_text, filenames)."""
+    texts, names = [], []
+    for f in files:
+        try:
+            name = f.name
+            lower = name.lower()
+            if lower.endswith(".pdf"):
+                try:
+                    from pypdf import PdfReader
+                except ImportError:
+                    texts.append(f"[{name}] (PDF support unavailable — install pypdf)")
+                    names.append(name)
+                    continue
+                f.seek(0)
+                reader = PdfReader(f)
+                page_chunks = []
+                for i, page in enumerate(reader.pages):
+                    try:
+                        page_chunks.append(page.extract_text() or "")
+                    except Exception:
+                        page_chunks.append("")
+                texts.append(f"# {name}\n\n" + "\n\n".join(page_chunks).strip())
+            else:
+                f.seek(0)
+                raw = f.read()
+                try:
+                    content = raw.decode("utf-8")
+                except UnicodeDecodeError:
+                    content = raw.decode("latin-1", errors="ignore")
+                texts.append(f"# {name}\n\n{content}")
+            names.append(name)
+        except Exception as e:
+            texts.append(f"[{getattr(f, 'name', 'file')}] (read error: {e})")
+            names.append(getattr(f, "name", "unknown"))
+    return ("\n\n---\n\n".join(t for t in texts if t).strip(), names)
+
+
+def _ensure_yield_prediction(ctx: dict) -> dict:
+    """Run the ML model to fill predicted_yield_tha/risk/band for the given context."""
+    try:
+        from agent.graph import run_agent
+    except Exception as e:
+        return {"error": f"Could not import agent: {e}"}
+    try:
+        result = run_agent(
+            crop=ctx["crop"], area=ctx["area"], year=int(ctx["year"]),
+            rainfall=float(ctx["rainfall"]), temperature=float(ctx["temperature"]),
+            pesticides=float(ctx["pesticides"]),
+            user_query="Generate a baseline advisory.",
+        )
+        ctx["predicted_yield_tha"] = result.get("predicted_yield_tha")
+        ctx["predicted_yield_hg"]  = result.get("predicted_yield_hg")
+        ctx["yield_band"]          = result.get("yield_band")
+        ctx["yield_risk"]          = result.get("yield_risk")
+        ctx["benchmark_avg"]       = result.get("benchmark_avg")
+        return {"ok": True, "advisory": result}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+def page_advisory():
+    CROPS = ["Wheat", "Rice, paddy", "Maize", "Potatoes", "Cassava",
+             "Soybeans", "Sorghum", "Sweet potatoes"]
+    AREAS = sorted([
+        "India", "Brazil", "USA", "China", "Argentina", "Australia",
+        "Canada", "France", "Germany", "Indonesia", "Mexico", "Nigeria",
+        "Pakistan", "Russia", "Thailand", "Turkey", "Ukraine",
+    ])
+
+    # ── Page-scoped chat styles (compact, uniform) ────────────────────────────
+    st.markdown("""
+    <style>
+    /* Compact header for this page */
+    .adv-head { padding: 22px 36px 6px; animation: fadeUp .4s ease both; }
+    .adv-eyebrow { font-size: .58rem; letter-spacing: .22em; text-transform: uppercase;
+                   color: var(--accent); margin-bottom: 6px; }
+    .adv-title { font-family: 'Outfit', sans-serif; font-size: 1.55rem; font-weight: 600;
+                 color: var(--text); letter-spacing: -.02em; line-height: 1.15; }
+    .adv-sub { font-family: 'DM Mono', monospace; font-size: .74rem; color: var(--muted);
+               margin-top: 4px; line-height: 1.5; max-width: 680px; }
+
+    /* Compact status chip grid — always 5-up on desktop, collapses at narrow widths */
+    .adv-chips {
+        display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 8px; margin: 14px 0 16px;
+    }
+    .adv-chip {
+        background: var(--surface2); border: 1px solid var(--border);
+        border-radius: 8px; padding: 9px 12px; min-width: 0;
+    }
+    .adv-chip-k { font-family: 'DM Mono', monospace; font-size: .55rem;
+                  color: var(--muted); letter-spacing: .14em;
+                  text-transform: uppercase; margin-bottom: 2px; }
+    .adv-chip-v { font-size: .92rem; font-weight: 600; color: var(--text);
+                  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    @media (max-width: 900px) { .adv-chips { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 560px) { .adv-chips { grid-template-columns: repeat(2, 1fr); } }
+
+    /* Unify toolbar buttons (neutralise the .cta gradient if it slips in) */
+    .adv-toolbar div[data-testid="stButton"] > button {
+        padding: 10px 0 !important; font-size: .72rem !important;
+        letter-spacing: .06em !important; text-transform: none !important;
+        background: var(--surface2) !important; color: var(--text) !important;
+        border: 1px solid var(--border) !important; font-weight: 500 !important;
+        animation: none !important; box-shadow: none !important;
+    }
+    .adv-toolbar div[data-testid="stButton"] > button:hover {
+        border-color: var(--accent) !important; color: var(--accent) !important;
+        box-shadow: none !important; transform: translateY(-1px) !important;
+    }
+
+    /* Empty-state card */
+    .adv-empty {
+        border: 1px dashed var(--border); border-radius: 12px;
+        background: var(--surface2); padding: 26px 22px; text-align: center;
+        margin: 4px 0 10px; animation: fadeUp .35s ease both;
+    }
+    .adv-empty h3 { font-family: 'Outfit', sans-serif; font-size: 1.05rem;
+                    font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .adv-empty p  { font-size: .82rem; color: var(--text2); line-height: 1.6;
+                    max-width: 560px; margin: 0 auto 14px; }
+
+    /* Suggestion pills (buttons inside .adv-pills are styled as pills) */
+    .adv-pills div[data-testid="stButton"] > button {
+        background: var(--surface3) !important; color: var(--text2) !important;
+        border: 1px solid var(--border) !important; border-radius: 100px !important;
+        padding: 8px 16px !important; font-size: .72rem !important;
+        font-family: 'DM Mono', monospace !important; font-weight: 400 !important;
+        letter-spacing: .02em !important; text-transform: none !important;
+        width: auto !important; min-width: 0 !important;
+        box-shadow: none !important; animation: none !important;
+    }
+    .adv-pills div[data-testid="stButton"] > button:hover {
+        background: var(--accent-bg) !important;
+        border-color: var(--accent) !important; color: var(--accent) !important;
+    }
+
+    /* Tame expander chrome */
+    .stExpander { border: 1px solid var(--border) !important; border-radius: 8px !important; }
+    .stExpander summary { font-size: .78rem !important; }
+
+    /* Chat message tweaks */
+    [data-testid="stChatMessageContent"] { font-size: .92rem; line-height: 1.65; }
+    [data-testid="stChatMessage"] { background: transparent !important; }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # ── Compact header ────────────────────────────────────────────────────────
+    st.markdown("""
+    <div class="adv-head">
+        <div class="adv-eyebrow">Milestone 2 · Agentic AI</div>
+        <div class="adv-title">CropCast Advisor · Chat with the Agent</div>
+        <div class="adv-sub">Conversational agronomist · LangGraph + FAISS RAG + Claude. Upload a field report or ask anything about your farm.</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<div class="page-content">', unsafe_allow_html=True)
+
+    ctx = st.session_state.chat_farm_ctx
+
+    # ── Status strip (always 5 chips, never wraps mid-row on desktop) ─────────
+    risk_colors = {"Low Risk": "#a8e063", "Medium Risk": "#f5a623", "High Risk": "#ff6b6b"}
+    band_colors = {"Excellent": "#a8e063", "Good": "#6abf3a", "Fair": "#f5a623", "Poor": "#ff6b6b"}
+
+    def _chip(label, value, color="var(--text)"):
+        return (f'<div class="adv-chip">'
+                f'<div class="adv-chip-k">{label}</div>'
+                f'<div class="adv-chip-v" style="color:{color};">{value}</div></div>')
+
+    yield_val = (f"{ctx.get('predicted_yield_tha')} t/ha"
+                 if ctx.get("predicted_yield_tha") is not None else "not run")
+    yield_col = ("var(--accent)" if ctx.get("predicted_yield_tha") is not None
+                 else "var(--text2)")
+
+    st.markdown(
+        '<div class="adv-chips">'
+        + _chip("Crop",   ctx.get("crop") or "—")
+        + _chip("Region", ctx.get("area") or "—")
+        + _chip("Yield",  yield_val, yield_col)
+        + _chip("Band",   ctx.get("yield_band") or "—",
+                band_colors.get(ctx.get("yield_band") or "", "var(--text)"))
+        + _chip("Risk",   ctx.get("yield_risk") or "—",
+                risk_colors.get(ctx.get("yield_risk") or "", "var(--text)"))
+        + '</div>',
+        unsafe_allow_html=True,
+    )
+
+    # ── Farm context + uploads (side-by-side expanders) ──────────────────────
+    top_l, top_r = st.columns(2, gap="small")
+
+    with top_l:
+        with st.expander("🌾  Farm context", expanded=False):
+            c1, c2 = st.columns(2)
+            with c1:
+                ctx["crop"] = st.selectbox("Crop", CROPS,
+                    index=CROPS.index(ctx["crop"]) if ctx["crop"] in CROPS else 0,
+                    key="ch_crop")
+                ctx["area"] = st.selectbox("Region", AREAS,
+                    index=AREAS.index(ctx["area"]) if ctx["area"] in AREAS else 0,
+                    key="ch_area")
+                ctx["year"] = st.number_input("Year", 1990, 2030, int(ctx["year"]),
+                                              key="ch_year")
+            with c2:
+                ctx["rainfall"]    = st.number_input("Rainfall (mm/yr)", 0.0, 5000.0,
+                                                     float(ctx["rainfall"]), 10.0,
+                                                     key="ch_rain")
+                ctx["temperature"] = st.number_input("Avg temp (°C)", -10.0, 50.0,
+                                                     float(ctx["temperature"]), 0.5,
+                                                     key="ch_temp")
+                ctx["pesticides"]  = st.number_input("Pesticides (t)", 0.0, 50000.0,
+                                                     float(ctx["pesticides"]), 10.0,
+                                                     key="ch_pest")
+
+            cc1, cc2 = st.columns(2)
+            with cc1:
+                if st.button("Run ML prediction", use_container_width=True,
+                             key="ch_predict"):
+                    with st.spinner("Running Random Forest..."):
+                        out = _ensure_yield_prediction(ctx)
+                    if out.get("error"):
+                        st.error(f"Prediction error: {out['error']}")
+                    else:
+                        st.success(
+                            f"{ctx['predicted_yield_tha']} t/ha · "
+                            f"{ctx['yield_band']} · {ctx['yield_risk']}"
+                        )
+            with cc2:
+                if st.button("Reset context", use_container_width=True,
+                             key="ch_reset_ctx"):
+                    for k in ("predicted_yield_tha", "predicted_yield_hg",
+                              "yield_band", "yield_risk", "benchmark_avg"):
+                        ctx[k] = None
+                    st.rerun()
+
+    with top_r:
+        with st.expander("📎  Upload field reports (PDF / TXT)", expanded=False):
+            files = st.file_uploader(
+                "Drop files — the agent reads them alongside its knowledge base.",
+                type=["pdf", "txt", "md"],
+                accept_multiple_files=True,
+                key="ch_files",
+                label_visibility="collapsed",
+            )
+            if files:
+                text, names = _extract_uploaded_text(files)
+                st.session_state.chat_uploaded_text = text
+                st.session_state.chat_uploaded_names = names
+                chars = len(text)
+                st.success(f"Loaded {len(names)} file(s) · {chars:,} chars.")
+            if st.session_state.chat_uploaded_names:
+                st.caption("Active: " + ", ".join(
+                    f"`{n}`" for n in st.session_state.chat_uploaded_names))
+                if st.button("Remove uploaded docs", use_container_width=True,
+                             key="ch_clear_files"):
+                    st.session_state.chat_uploaded_text = ""
+                    st.session_state.chat_uploaded_names = []
+                    st.rerun()
+
+    # ── Chat toolbar (uniform 2-button row) ───────────────────────────────────
+    st.markdown('<div class="adv-toolbar">', unsafe_allow_html=True)
+    tb1, tb2, _tb_spacer = st.columns([.22, .28, .50])
+    with tb1:
+        if st.button("🧹  New chat", use_container_width=True, key="ch_reset"):
+            st.session_state.chat_messages = []
+            st.rerun()
+    with tb2:
+        if st.button("📋  Structured report", use_container_width=True,
+                     key="ch_full_report",
+                     help="Run the full LangGraph pipeline and post a structured advisory into the chat."):
+            _run_structured_report_into_chat(ctx)
+            st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # ── Chat history render ───────────────────────────────────────────────────
+    _SUGGESTIONS = [
+        "Give me a full advisory for my current farm.",
+        "What are the biggest risks to my yield this season?",
+        "Which pests should I watch for right now?",
+        "How should I plan irrigation for the next 4 weeks?",
+        "Summarise the uploaded report and flag anything concerning.",
+    ]
+
+    if not st.session_state.chat_messages:
+        st.markdown(
+            '<div class="adv-empty">'
+            "<h3>Hi, I'm CropCast Advisor.</h3>"
+            "<p>Set your farm context, upload a field report, then ask me anything — "
+            "yield drivers, irrigation plans, pest risks, or fertilizer timing.</p>"
+            "</div>",
+            unsafe_allow_html=True,
+        )
+        st.markdown('<div class="adv-pills">', unsafe_allow_html=True)
+        pcols = st.columns(len(_SUGGESTIONS))
+        for i, (col, s) in enumerate(zip(pcols, _SUGGESTIONS)):
+            with col:
+                if st.button(s, key=f"ch_sugg_{i}", use_container_width=True):
+                    st.session_state["__pending_prompt"] = s
+                    st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    for m in st.session_state.chat_messages:
+        with st.chat_message(m["role"], avatar="🌾" if m["role"] == "assistant" else None):
+            st.markdown(m["content"])
+            if m["role"] == "assistant" and m.get("sources"):
+                with st.expander("📚  References used in this reply"):
+                    for s in m["sources"]:
+                        st.caption(f"• {s}")
+
+    # ── Chat input + handler ──────────────────────────────────────────────────
+    pending = st.session_state.pop("__pending_prompt", None)
+    prompt = st.chat_input("Ask the agent about your farm…") or pending
+
+    if prompt:
+        if not os.environ.get("ANTHROPIC_API_KEY"):
+            st.warning("`ANTHROPIC_API_KEY` not set — the agent will use a local (non-LLM) fallback response. "
+                       "Add the key to your `.env` to unlock full reasoning.")
+
+        # Append user message + render immediately
+        st.session_state.chat_messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        # Build api-safe history (role/content only)
+        api_history = [
+            {"role": m["role"], "content": m["content"]}
+            for m in st.session_state.chat_messages
+            if m["role"] in ("user", "assistant")
+        ]
+
+        with st.chat_message("assistant", avatar="🌾"):
+            placeholder = st.empty()
+            placeholder.markdown("_Thinking…_")
+            try:
+                from agent.graph import run_chat
+                result = run_chat(
+                    messages=api_history,
+                    farm_ctx=ctx,
+                    uploaded_docs_text=st.session_state.chat_uploaded_text,
+                )
+            except Exception as e:
+                placeholder.empty()
+                st.error(f"Agent error: {e}")
+                st.session_state.chat_messages.append({
+                    "role": "assistant",
+                    "content": f"I hit an error while reasoning: `{e}`. "
+                               "Please check the Anthropic API key / network and try again.",
+                    "sources": [],
+                })
+                return
+
+            if result.get("error") and not result.get("assistant_reply"):
+                reply = f"⚠️ {result['error']}"
+                sources = []
+            else:
+                reply = result.get("assistant_reply") or "I wasn't able to generate a response."
+                sources = result.get("source_files") or []
+
+            placeholder.markdown(reply)
+            if sources:
+                with st.expander("📚  References used in this reply"):
+                    for s in sources:
+                        st.caption(f"• {s}")
+
+        st.session_state.chat_messages.append({
+            "role": "assistant",
+            "content": reply,
+            "sources": sources,
+        })
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+
+def _run_structured_report_into_chat(ctx: dict) -> None:
+    """Run the full LangGraph advisory pipeline and push a structured message into the chat."""
+    try:
+        from agent.graph import run_agent
+    except Exception as e:
+        st.session_state.chat_messages.append({
+            "role": "assistant",
+            "content": f"Could not import agent: `{e}`",
+            "sources": [],
+        })
+        return
+
+    user_msg = (
+        f"Generate a full structured advisory for {ctx.get('crop','my crop')} "
+        f"in {ctx.get('area','my region')}."
+    )
+    st.session_state.chat_messages.append({"role": "user", "content": user_msg})
+
+    try:
+        result = run_agent(
+            crop=ctx.get("crop", "Wheat"),
+            area=ctx.get("area", "India"),
+            year=int(ctx.get("year", 2024) or 2024),
+            rainfall=float(ctx.get("rainfall", 0) or 0),
+            temperature=float(ctx.get("temperature", 0) or 0),
+            pesticides=float(ctx.get("pesticides", 0) or 0),
+            user_query=user_msg,
+        )
+    except Exception as e:
+        st.session_state.chat_messages.append({
+            "role": "assistant",
+            "content": f"Pipeline error: `{e}`",
+            "sources": [],
+        })
+        return
+
+    # Sync predictions back into chat context
+    ctx["predicted_yield_tha"] = result.get("predicted_yield_tha") or ctx.get("predicted_yield_tha")
+    ctx["predicted_yield_hg"]  = result.get("predicted_yield_hg")  or ctx.get("predicted_yield_hg")
+    ctx["yield_band"]          = result.get("yield_band")          or ctx.get("yield_band")
+    ctx["yield_risk"]          = result.get("yield_risk")          or ctx.get("yield_risk")
+    ctx["benchmark_avg"]       = result.get("benchmark_avg")       or ctx.get("benchmark_avg")
+
+    if result.get("error"):
+        st.session_state.chat_messages.append({
+            "role": "assistant",
+            "content": f"⚠️ {result['error']}",
+            "sources": [],
+        })
+        return
+
+    # Format as markdown
+    md = []
+    md.append("## Structured Farm Advisory\n")
+    md.append(
+        f"**Crop & field snapshot** — {ctx.get('crop')} in {ctx.get('area')}, "
+        f"year {ctx.get('year')} · rainfall {ctx.get('rainfall')} mm · "
+        f"temp {ctx.get('temperature')} °C · pesticides {ctx.get('pesticides')} t.\n"
+    )
+    md.append(
+        f"**Predicted yield:** {result.get('predicted_yield_tha','—')} t/ha  \n"
+        f"**Band:** {result.get('yield_band','—')}  ·  "
+        f"**Risk:** {result.get('yield_risk','—')}  ·  "
+        f"**Crop benchmark:** ~{result.get('benchmark_avg','—')} t/ha\n"
+    )
+    if result.get("field_summary"):
+        md.append("### Field & Crop Summary\n" + result["field_summary"] + "\n")
+    if result.get("recommendations"):
+        md.append("### Recommended Actions")
+        for i, r in enumerate(result["recommendations"], 1):
+            md.append(f"{i}. {r}")
+        md.append("")
+    if result.get("sources"):
+        md.append("### Agronomic References")
+        for s in result["sources"]:
+            md.append(f"> {s}")
+        md.append("")
+    if result.get("disclaimer"):
+        md.append(f"> ⚠️ *{result['disclaimer']}*")
+
+    st.session_state.chat_messages.append({
+        "role": "assistant",
+        "content": "\n".join(md),
+        "sources": result.get("source_files") or [],
+    })
+
+# ══════════════════════════════════════════════════════════════════════════════
 #  ROUTER
 # ══════════════════════════════════════════════════════════════════════════════
 render_sidebar()
@@ -1823,4 +2307,5 @@ if   st.session_state.page == "model":    page_model()
 elif st.session_state.page == "loading":  page_loading()
 elif st.session_state.page == "results":  page_results()
 elif st.session_state.page == "insights": page_insights()
+elif st.session_state.page == "advisory": page_advisory()
 elif st.session_state.page == "about":    page_about()
