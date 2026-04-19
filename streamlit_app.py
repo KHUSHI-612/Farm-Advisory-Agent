@@ -110,10 +110,8 @@ html, body {{ background: var(--bg) !important; transition: background .35s ease
 section[data-testid="stSidebar"] {{
     background: {_SB_BG} !important;
     border-right: 1px solid var(--border) !important;
-    width: var(--sidebar-w) !important;
-    min-width: var(--sidebar-w) !important;
-    max-width: var(--sidebar-w) !important;
-    overflow: hidden !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
     transition: background .35s ease !important;
     transform: none !important;
     left: 0 !important;
@@ -123,15 +121,14 @@ section[data-testid="stSidebar"] {{
 /* Override any collapsed-state transforms Streamlit applies */
 section[data-testid="stSidebar"][aria-expanded="false"] {{
     transform: none !important;
-    width: var(--sidebar-w) !important;
-    min-width: var(--sidebar-w) !important;
     visibility: visible !important;
     display: flex !important;
 }}
 section[data-testid="stSidebar"] > div:first-child {{
     padding: 0 !important;
     height: 100vh !important;
-    overflow: hidden !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
     display: flex !important;
     flex-direction: column !important;
 }}
@@ -140,7 +137,23 @@ section[data-testid="stSidebarContent"] {{
     flex: 1 !important;
     display: flex !important;
     flex-direction: column !important;
-    overflow: hidden !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scrollbar-width: thin;
+    scrollbar-color: {_ACC}80 transparent;
+}}
+section[data-testid="stSidebarContent"]::-webkit-scrollbar {{
+    width: 3px;
+}}
+section[data-testid="stSidebarContent"]::-webkit-scrollbar-track {{
+    background: transparent;
+}}
+section[data-testid="stSidebarContent"]::-webkit-scrollbar-thumb {{
+    background: {_ACC}66;
+    border-radius: 10px;
+}}
+section[data-testid="stSidebarContent"]::-webkit-scrollbar-thumb:hover {{
+    background: {_ACC}b3;
 }}
 /* Remove Streamlit's default sidebar inner padding wrapper */
 section[data-testid="stSidebar"] .block-container {{
@@ -148,7 +161,7 @@ section[data-testid="stSidebar"] .block-container {{
     flex: 1 !important;
     display: flex !important;
     flex-direction: column !important;
-    overflow: hidden !important;
+    overflow: visible !important;
 }}
 /* Footer always at bottom */
 .sbft {{ margin-top: auto !important; }}
@@ -957,7 +970,7 @@ st.markdown(f"""
     border-left: 2px solid transparent !important; border-radius: 0 !important;
     color: var(--muted) !important; font-family: 'DM Mono', monospace !important;
     font-size: .72rem !important; font-weight: 400 !important; letter-spacing: .08em !important;
-    padding: 14px 20px 14px 16px !important; width: 100% !important; text-align: left !important;
+    padding: 12px 20px 12px 48px !important; width: 100% !important; text-align: left !important;
     position: relative !important; overflow: hidden !important;
     transition: background .18s ease, color .18s ease, border-color .18s ease !important;
 }}
@@ -1257,25 +1270,8 @@ def render_sidebar():
     _tog_lbl = _TOGGLE_LABEL
 
     # Sun/moon icon HTML island
-    _ICON_HTML = f"""<style>
-    body{{margin:0;padding:0;background:transparent;overflow:hidden;}}
-    .tog{{display:flex;align-items:center;gap:12px;padding:13px 20px 13px 18px;
-          background:transparent;width:100%;border:none;border-left:2px solid transparent;
-          cursor:pointer;color:var(--muted,#555558);font-size:.73rem;
-          font-family:'DM Mono',monospace;letter-spacing:.07em;
-          transition:background .18s,color .18s,border-color .18s;}}
-    .tog:hover{{background:rgba(255,255,255,.04);color:{_acc};border-left-color:{_acc};}}
-    .ticon{{width:16px;height:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}}
-    .ticon svg{{width:100%;height:100%;stroke:{_acc if not _is_dark else '#888'}}}
-    .tog:hover .ticon svg{{stroke:{_acc};}}
-    </style>
-    <button class="tog" onclick="void(0)">
-      <div class="ticon">
-        {'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/></svg>' if _is_dark else
-          '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>'}
-      </div>
-      <span>{_tog_lbl}</span>
-    </button>"""
+    # Theme SVG Icon
+    _theme_icon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/></svg>' if _is_dark else '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>'
 
     with st.sidebar:
         # ── Sidebar button styles ───────────────────────────────────────────
@@ -1286,7 +1282,7 @@ def render_sidebar():
             border-left: 2px solid transparent !important; border-radius: 0 !important;
             color: var(--muted) !important; font-family: 'DM Mono', monospace !important;
             font-size: .78rem !important; font-weight: 400 !important;
-            text-align: left !important; padding: 15px 20px 15px 48px !important;
+            text-align: left !important; padding: 12px 20px 12px 48px !important;
             width: 100% !important; margin: 0 !important;
             transition: background .18s ease, color .18s ease, border-color .18s ease !important;
             box-shadow: none !important; letter-spacing: .04em !important;
@@ -1351,7 +1347,11 @@ def render_sidebar():
         st.markdown('<div style="height:1px;background:var(--border);margin:0;"></div>', unsafe_allow_html=True)
 
         # ── Theme toggle ───────────────────────────────────────────────────
-        components.html(_ICON_HTML, height=46, scrolling=False)
+        st.markdown(f"""
+        <div style="position:relative;height:0;overflow:visible;pointer-events:none;">
+          <div style="position:absolute;top:0;left:16px;transform:translateY(22px) translateY(-50%);
+                      color:var(--muted);line-height:0;">{_theme_icon}</div>
+        </div>""", unsafe_allow_html=True)
         st.markdown('<div class="theme-toggle-full">', unsafe_allow_html=True)
         if st.button(_tog_lbl, key="theme_btn", use_container_width=True):
             st.session_state.theme = "light" if _is_dark else "dark"
@@ -1386,7 +1386,7 @@ def render_sidebar():
             ic_col = "var(--accent)" if is_active else "var(--muted)"
             st.markdown(f"""
             <div style="position:relative;height:0;overflow:visible;pointer-events:none;">
-              <div style="position:absolute;top:0;left:16px;transform:translateY(24px) translateY(-50%);
+              <div style="position:absolute;top:0;left:16px;transform:translateY(22px) translateY(-50%);
                           color:{ic_col};line-height:0;">{_ico}</div>
             </div>""", unsafe_allow_html=True)
 

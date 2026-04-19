@@ -4,6 +4,7 @@ Wires all nodes into a sequential graph:
   parse_input → predict_yield → assess_risk → retrieve_docs → generate_advice → END
 """
 
+from typing import Optional
 from langgraph.graph import StateGraph, END
 from agent.state import FarmState
 from agent.nodes import (
@@ -121,7 +122,7 @@ def run_agent(
 
 def run_chat(
     messages: list,
-    farm_ctx: dict | None = None,
+    farm_ctx: Optional[dict] = None,
     uploaded_docs_text: str = "",
 ) -> FarmState:
     """
