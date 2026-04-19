@@ -37,9 +37,7 @@ def build_vectorstore():
 
     print(f"\nSplitting {len(docs)} documents into chunks...")
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500,
-        chunk_overlap=100,
-        separators=["\n\n", "\n", ". ", " "]
+        chunk_size=500, chunk_overlap=100, separators=["\n\n", "\n", ". ", " "]
     )
     chunks = splitter.split_documents(docs)
     print(f"Created {len(chunks)} chunks")
@@ -48,7 +46,7 @@ def build_vectorstore():
     embeddings = HuggingFaceEmbeddings(
         model_name="sentence-transformers/all-MiniLM-L6-v2",
         model_kwargs={"device": "cpu"},
-        encode_kwargs={"normalize_embeddings": True}
+        encode_kwargs={"normalize_embeddings": True},
     )
 
     print("Building FAISS vector store...")
@@ -66,14 +64,12 @@ def load_vectorstore():
     embeddings = HuggingFaceEmbeddings(
         model_name="sentence-transformers/all-MiniLM-L6-v2",
         model_kwargs={"device": "cpu"},
-        encode_kwargs={"normalize_embeddings": True}
+        encode_kwargs={"normalize_embeddings": True},
     )
 
     if (VECTORSTORE_DIR / "index.faiss").exists():
         return FAISS.load_local(
-            str(VECTORSTORE_DIR),
-            embeddings,
-            allow_dangerous_deserialization=True
+            str(VECTORSTORE_DIR), embeddings, allow_dangerous_deserialization=True
         )
     else:
         print("Vector store not found — building now...")
