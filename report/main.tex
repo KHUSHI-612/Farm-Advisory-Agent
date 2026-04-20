@@ -807,6 +807,266 @@ The application accepts: \textbf{Crop Type}, \textbf{Year}, \textbf{Rainfall (mm
 \textbf{Temperature ($^\circ$C)}, and \textbf{Pesticides (tonnes)}.
 Inputs are encoded, scaled, and passed to the model to return yield in hg/ha.
 
+\section{Phase 2: AI-Assisted Agricultural Advisory System}
+
+\subsection{Introduction}
+
+Phase~2 extends the CropCast deployment from yield prediction alone to a
+\emph{hybrid} platform that combines the existing Random Forest regressor with
+\emph{LangGraph} orchestration, \emph{retrieval-augmented generation} (RAG) over
+local agronomy text, and a \emph{multi-turn conversational} interface powered by
+the Anthropic API (official Python client in \texttt{agent/nodes.py}). The
+structured advisory path (\texttt{run\_agent} in \texttt{agent/graph.py}) chains
+parse $\rightarrow$ predict $\rightarrow$ risk assessment $\rightarrow$ document
+retrieval $\rightarrow$ LLM synthesis. A separate compiled graph (\texttt{run\_chat})
+runs only the \texttt{chat\_turn} node per message so conversation stays responsive
+and does not re-execute the full pipeline every turn.
+
+\subsection{Structured Advisory Pipeline}
+
+Figure~\ref{fig:phase2-advisory-pipeline} shows the LangGraph workflow as
+implemented in \texttt{build\_graph()}. The final artefacts are fields in
+\texttt{FarmState} (e.g.\ \texttt{field\_summary}, \texttt{recommendations},
+\texttt{sources}), not the PDF/HTML yield reports in \texttt{report\_generator.py},
+which are generated on a separate ML-only path from the Streamlit UI.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.92\textwidth}{!}{%
+\begin{tikzpicture}[
+    node distance=1.35cm,
+    box/.style={draw=primary, rounded corners=4pt, line width=0.6pt,
+                align=center, minimum width=3.15cm, minimum height=1.05cm,
+                font=\small, inner sep=5pt, fill=lightblue!35},
+    arrow/.style={-{Stealth[length=2.4mm]}, thick, color=darkgrey}
+]
+\node[box] (input) {\textbf{User / default query}\\\footnotesize\texttt{parse\_input}};
+\node[box, below=of input] (predict) {\textbf{Predict yield}\\\footnotesize\texttt{predict\_yield} (RF)};
+\node[box, below=of predict] (risk) {\textbf{Risk vs benchmarks}\\\footnotesize\texttt{assess\_risk}};
+\node[box, below=of risk] (rag) {\textbf{Retrieve chunks}\\\footnotesize\texttt{retrieve\_docs}};
+\node[box, below=of rag] (llm) {\textbf{LLM + JSON}\\\footnotesize\texttt{generate\_advice}};
+\node[box, below=of llm, fill=accent!15] (out) {\textbf{\texttt{FarmState}}\\\footnotesize summary, recommendations, sources};
+
+\draw[arrow] (input) -- (predict);
+\draw[arrow] (predict) -- (risk);
+\draw[arrow] (risk) -- (rag);
+\draw[arrow] (rag) -- (llm);
+\draw[arrow] (llm) -- (out);
+\end{tikzpicture}%
+}
+\caption{Phase~2 \textbf{structured advisory} pipeline (\texttt{run\_agent} / \texttt{build\_graph} in \texttt{agent/graph.py}; node logic in \texttt{agent/nodes.py}). Yield PDF/HTML reports (\texttt{report\_generator.py}) are produced separately from the ML prediction flow.}
+\label{fig:phase2-advisory-pipeline}
+\end{figure}
+
+\subsection{RAG Workflow}
+
+Documents under \texttt{rag/docs/} are chunked and embedded with
+\texttt{sentence-transformers/all-MiniLM-L6-v2}, then indexed in FAISS
+(\texttt{rag/ingest.py}, persisted under \texttt{rag/vectorstore/}). At query
+time, \texttt{rag/retriever.py} loads the index and runs
+\texttt{similarity\_search}; retrieved text is passed into
+\texttt{generate\_advice} and \texttt{chat\_turn}. Figure~\ref{fig:phase2-rag}
+summarises this split between offline index construction and online retrieval.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.98\textwidth}{!}{%
+\begin{tikzpicture}[
+    node distance=1.25cm and 2.1cm,
+    box/.style={draw=primary, rounded corners=4pt, line width=0.55pt,
+                align=center, minimum width=2.75cm, minimum height=0.95cm,
+                font=\small, inner sep=4pt, fill=lightgrey},
+    arrow/.style={-{Stealth[length=2.2mm]}, thick, color=darkgrey},
+    lbl/.style={font=\footnotesize\itshape, text=darkgrey}
+]
+
+\node[box] (docs) {Corpus\\\texttt{rag/docs/*.txt}};
+\node[box, right=of docs] (faiss) {FAISS index\\\texttt{vectorstore/}};
+\node[box, below=1.6cm of docs] (q) {User query string};
+\node[box, right=of q] (ret) {Similarity search\\\texttt{retriever.py}};
+\node[box, right=of ret, fill=lightblue!40] (llm) {Claude\\\texttt{nodes.py}};
+
+\draw[arrow] (docs) -- node[lbl, above, sloped, near start] {ingest} (faiss);
+\draw[arrow] (q) -- (ret);
+\draw[arrow] (faiss.south) -- ++(0,-0.45) -| (ret.north);
+\draw[arrow] (ret) -- (llm);
+
+\end{tikzpicture}%
+}
+\caption{RAG in the codebase: FAISS is built offline from embedded chunks; each advisory or chat turn runs similarity search (query embedded with the same MiniLM model) and passes top-$k$ chunks to the LLM.}
+\label{fig:phase2-rag}
+\end{figure}
+
+\subsection{System Components}
+
+\begin{table}[H]
+\centering
+\caption{Phase~2 components mapped to the repository.}
+\label{tab:phase2-components}
+\renewcommand{\arraystretch}{1.28}
+\begin{tabularx}{\textwidth}{L{3.1cm} L{3.4cm} X}
+\toprule
+\rowcolor{primary}
+\color{white}\textbf{Component} &
+\color{white}\textbf{Technology} &
+\color{white}\textbf{Role in codebase} \\
+\midrule
+\rowcolor{lightgrey}
+Prediction engine &
+scikit-learn Random Forest &
+\texttt{predict\_yield} in \texttt{agent/nodes.py}; same artefacts in \texttt{streamlit\_app.py} for the UI \\
+Advisory orchestration &
+LangGraph &
+\texttt{agent/graph.py} (\texttt{build\_graph}, \texttt{run\_agent}; \texttt{build\_chat\_graph}, \texttt{run\_chat}) \\
+\rowcolor{lightgrey}
+RAG &
+FAISS + \texttt{all-MiniLM-L6-v2} &
+\texttt{rag/ingest.py}, \texttt{rag/retriever.py} \\
+LLM &
+Anthropic Claude (Messages API) &
+\texttt{anthropic} client in \texttt{agent/nodes.py}; prompts in \texttt{agent/prompts.py} \\
+\rowcolor{lightgrey}
+Frontend &
+Streamlit &
+\texttt{streamlit\_app.py} (multi-page router, advisory chat) \\
+Reports &
+ReportLab (PDF); HTML (Python template) &
+\texttt{report\_generator.py} (\texttt{generate\_pdf\_report}, \texttt{build\_html\_report}) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Advisory Pipeline Stages}
+
+\begin{table}[H]
+\centering
+\caption{Structured advisory pipeline stages (\texttt{run\_agent} / \texttt{build\_graph}).}
+\label{tab:phase2-pipeline-stages}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{L{2.6cm} X L{4.2cm}}
+\toprule
+\rowcolor{primary}
+\color{white}\textbf{Stage} &
+\color{white}\textbf{Role} &
+\color{white}\textbf{Implementation} \\
+\midrule
+\rowcolor{lightgrey}
+Parsing &
+Defaults, clamps, query text &
+\texttt{parse\_input} --- \texttt{agent/nodes.py} \\
+Prediction &
+RF inference &
+\texttt{predict\_yield} --- \texttt{agent/nodes.py}; artefacts \texttt{model.pkl}, \texttt{scaler.pkl}, \texttt{features.pkl} \\
+\rowcolor{lightgrey}
+Risk analysis &
+Ratio vs \texttt{CROP\_BENCHMARKS} &
+\texttt{assess\_risk} --- \texttt{agent/nodes.py} \\
+Retrieval &
+Top-$k$ chunks &
+\texttt{retrieve\_docs} $\rightarrow$ \texttt{rag/retriever.py}; edges in \texttt{agent/graph.py} \\
+\rowcolor{lightgrey}
+Advice generation &
+Claude + JSON &
+\texttt{generate\_advice} --- \texttt{agent/nodes.py} \\
+Graph compile &
+Pipeline wiring &
+\texttt{build\_graph} --- \texttt{agent/graph.py} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Phase 1 vs.\ Phase 2}
+
+\begin{table}[H]
+\centering
+\caption{Evolution from prediction-centric work (Phase~1) to the hybrid advisory system (Phase~2) in the same codebase.}
+\label{tab:phase2-vs-phase1}
+\renewcommand{\arraystretch}{1.22}
+\begin{tabularx}{\textwidth}{L{2.9cm} X X}
+\toprule
+\rowcolor{primary}
+\color{white}\textbf{Aspect} &
+\color{white}\textbf{Phase 1 (emphasis)} &
+\color{white}\textbf{Phase 2 (additions)} \\
+\midrule
+\rowcolor{lightgrey}
+Primary focus &
+Yield estimation from inputs &
+Same RF prediction plus LangGraph advisory and RAG-backed chat \\
+ML model &
+Random Forest regressor &
+Same serialized model and feature construction \\
+\rowcolor{lightgrey}
+Beyond classical ML &
+--- &
+Anthropic Claude + FAISS retrieval (\texttt{agent/}, \texttt{rag/}) \\
+Interaction &
+Form-driven prediction workflow &
+Multi-turn chat and optional full-pipeline structured advisory \\
+\rowcolor{lightgrey}
+Outputs &
+Predictions, charts, PDF/HTML yield reports &
+Above plus LLM fields and chat replies (separate code paths from yield-only exports) \\
+Layout &
+Application-centric UI &
+Modular \texttt{agent/} and \texttt{rag/}; main UI remains largely in \texttt{streamlit\_app.py} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Risk and Quality Notation}
+
+The agent's \texttt{assess\_risk} step compares predicted yield to static
+benchmarks in \texttt{CROP\_BENCHMARKS} (\texttt{agent/nodes.py}). Separately, the
+HTML report builder applies an absolute t/ha band for ``quality'' in
+\texttt{build\_html\_report} (\texttt{report\_generator.py}). These two mechanisms
+are related for communication but not identical functions.
+
+\subsection{Representative Interface Views}
+
+Figure~\ref{fig:phase2-ui} shows screens from the deployed Streamlit application:
+the yield dashboard ties into farm context used by the advisory agent, and the
+full report view illustrates PDF/HTML-style output from the prediction path.
+The conversational \emph{Advisory Agent} tab is implemented in code but may not
+appear in static screenshots.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}[t]{0.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{ui_result.png}
+\caption{Yield dashboard after inference (quality gauge and summary).}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{ui_report_full.png}
+\caption{Downloadable yield analysis report (executive summary and KPIs).}
+\end{subfigure}
+\caption{Representative CropCast views supporting Phase~1--2 deployment; structured LLM advisory is delivered via a separate chat workflow in the same app.}
+\label{fig:phase2-ui}
+\end{figure}
+
+\subsection{Evaluation and Robustness}
+
+Held-out test performance for the Random Forest is summarised elsewhere in this
+report (e.g.\ $R^2 \approx 0.98$ on the documented test split in the modelling
+section). The advisory layer adds RAG-grounded prompts (\texttt{agent/prompts.py}),
+model-ID fallbacks for Anthropic (\texttt{\_anthropic\_model\_candidates}), JSON
+parse fallbacks in \texttt{generate\_advice}, and offline-style chat templates when
+the API is unavailable, improving demo robustness without changing the sklearn
+artefacts.
+
+\subsection{Challenges and Limitations (Phase 2)}
+
+\begin{itemize}[leftmargin=2em]
+  \item Coupling deterministic inference with stochastic LLM outputs and strict
+        JSON parsing for structured advice.
+  \item Retrieval quality depends on chunking, query wording, and a static corpus
+        unless \texttt{rag/docs/} is updated and the index rebuilt.
+  \item Expert validation of natural-language recommendations is outside the scope
+        of the software artefact.
+\end{itemize}
+
 \section{Challenges Faced}
 
 \begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=2.5em]
