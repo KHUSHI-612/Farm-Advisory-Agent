@@ -17,6 +17,7 @@ import numpy as np
 from pathlib import Path
 from dotenv import load_dotenv
 import anthropic
+from openai import OpenAI
 
 from agent.state import FarmState
 from agent.prompts import ADVISORY_PROMPT, CHAT_SYSTEM_PROMPT, CHAT_FALLBACK_TEMPLATE
@@ -27,6 +28,69 @@ load_dotenv()
 # ── Paths ─────────────────────────────────────────────────────────────────────
 MODEL_DIR = Path(__file__).parent.parent / "model"
 HF_REPO = "shiavm006/Crop-yield_pridiction"
+
+
+def _is_provider_limit_error(msg: str) -> bool:
+    """Detect quota / credit / throttling style provider errors."""
+    s = (msg or "").lower()
+    limit_tokens = [
+        "insufficient_quota",
+        "quota",
+        "credit",
+        "billing",
+        "rate limit",
+        "rate_limit",
+        "overloaded",
+        "capacity",
+        "exceeded",
+        "429",
+        "anthropic_api_key not set",
+    ]
+    return any(tok in s for tok in limit_tokens)
+
+
+def _openai_model_candidates() -> list:
+    preferred = os.environ.get("OPENAI_MODEL", "")
+    raw = [
+        preferred,
+        "gpt-4o-mini",
+        "gpt-4.1-mini",
+        "gpt-4.1",
+    ]
+    seen, ordered = set(), []
+    for m in raw:
+        if m and m not in seen:
+            seen.add(m)
+            ordered.append(m)
+    return ordered
+
+
+def _openai_chat(messages: list, system_prompt: str | None = None, max_tokens: int = 1800) -> str:
+    """Call OpenAI chat completions with model failover."""
+    client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+    payload = []
+    if system_prompt:
+        payload.append({"role": "system", "content": system_prompt})
+    payload.extend(messages)
+
+    last_err = None
+    for model_name in _openai_model_candidates():
+        try:
+            resp = client.chat.completions.create(
+                model=model_name,
+                messages=payload,
+                max_tokens=max_tokens,
+                temperature=0.2,
+            )
+            text = (resp.choices[0].message.content or "").strip()
+            if text:
+                return text
+        except Exception as e:
+            last_err = e
+            continue
+    if last_err:
+        raise last_err
+    raise RuntimeError("OpenAI fallback failed without a response.")
 
 
 def _load_pkl(filename: str):
@@ -235,7 +299,7 @@ def generate_advice(state: FarmState) -> FarmState:
             retrieved_docs=docs_text,
         )
 
-        # Try the same broad, current model list as chat_turn.
+        # Try Anthropic first.
         deduped_candidates = _anthropic_model_candidates()
         response = None
         last_err = None
@@ -292,9 +356,45 @@ def generate_advice(state: FarmState) -> FarmState:
         )
 
     except Exception as e:
-        # If all Anthropic models are unavailable, return a safe local fallback
-        # so the advisory page still works during demos/submissions.
+        # Transparent provider fallback: Claude -> OpenAI on quota/credit/rate-limit.
         msg = str(e)
+        raw = ""
+        used_openai = False
+
+        if _is_provider_limit_error(msg) and os.environ.get("OPENAI_API_KEY"):
+            try:
+                raw = _openai_chat(
+                    messages=[{"role": "user", "content": prompt}],
+                    system_prompt=(
+                        "You are an agronomy assistant. Return strict JSON only with keys: "
+                        "field_summary, recommendations, sources, disclaimer."
+                    ),
+                    max_tokens=1500,
+                )
+                used_openai = True
+            except Exception as oe:
+                msg = f"{msg} | OpenAI fallback failed: {oe}"
+
+        if used_openai and raw:
+            try:
+                if raw.startswith("```"):
+                    raw = raw.split("```")[1]
+                    if raw.startswith("json"):
+                        raw = raw[4:]
+                raw = raw.strip()
+                result = json.loads(raw)
+                state["field_summary"]    = result.get("field_summary", "")
+                state["recommendations"]  = result.get("recommendations", [])
+                state["sources"]          = result.get("sources", [])
+                state["disclaimer"]       = result.get("disclaimer", "Consult local agricultural extension officers for region-specific advice.")
+                state["error"] = None
+                return state
+            except Exception:
+                # Continue to local fallback if OpenAI output is malformed.
+                pass
+
+        # If model IDs are unavailable, return a safe local fallback
+        # so the advisory page still works during demos/submissions.
         if "not_found_error" in msg or "model:" in msg:
             crop = state.get("crop", "the selected crop")
             risk = state.get("yield_risk", "Unknown Risk")
@@ -464,11 +564,23 @@ def chat_turn(state: FarmState) -> FarmState:
                     break
                 except Exception as e:
                     last_err = e
-                    if "not_found_error" in str(e) or "model:" in str(e):
+                    emsg = str(e)
+                    if "not_found_error" in emsg or "model:" in emsg or _is_provider_limit_error(emsg):
                         continue
                     raise
         except KeyError:
             last_err = RuntimeError("ANTHROPIC_API_KEY not set in environment.")
+
+        # Transparent fallback to OpenAI if Claude is out of credits/quota/rate-limited.
+        if not reply_text and last_err and _is_provider_limit_error(str(last_err)) and os.environ.get("OPENAI_API_KEY"):
+            try:
+                reply_text = _openai_chat(
+                    messages=api_messages,
+                    system_prompt=system_prompt,
+                    max_tokens=1800,
+                )
+            except Exception as oe:
+                last_err = RuntimeError(f"{last_err} | OpenAI fallback failed: {oe}")
 
         if not reply_text:
             # Local, non-LLM fallback so the chat still works in demos.

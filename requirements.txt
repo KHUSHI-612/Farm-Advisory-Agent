@@ -13,5 +13,6 @@ langchain-huggingface
 faiss-cpu
 pypdf
 anthropic
+openai>=1.0.0
 python-dotenv
 sentence-transformers
